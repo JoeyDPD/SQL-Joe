@@ -1,3 +1,198 @@
+*Anything between two asterisks are comments for ease of understanding - they are not included in the queries*
+
+Table Creation
+
 CREATE TABLE Coach
 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-coach_name VARCHAR(50) NOT NULL)
+coach_name VARCHAR(50) NOT NULL);
+
+CREATE TABLE AgeGroup
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+age_group VARCHAR(50) NOT NULL);
+
+CREATE TABLE Guardian
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+guardian_name VARCHAR(50) NOT NULL);
+
+CREATE TABLE Team
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+age_group_id INTEGER NOT NULL,
+number_of_players INTEGER NOT NULL,
+league_position INTEGER NOT NULL,
+team_name TEXT,
+FOREIGN KEY (age_group_id) REFERENCES AgeGroup(id));
+
+CREATE TABLE Coach_Team
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+coach_id INTEGER NOT NULL,
+team_id INTEGER NOT NULL,
+FOREIGN KEY (coach_id) REFERENCES Coach(id),
+FOREIGN KEY (team_id) REFERENCES Team(id));
+
+CREATE TABLE Player
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+player_name VARCHAR(50) NOT NULL,
+age INTEGER NOT NULL,
+team_id INTEGER NOT NULL,
+FOREIGN KEY (team_id) REFERENCES Team(id));
+
+CREATE TABLE PlayerGuardian
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+player_id INTEGER NOT NULL,
+guardian_id INTEGER NOT NULL,
+FOREIGN KEY (player_id) REFERENCES Player(id),
+FOREIGN KEY (guardian_id) REFERENCES Guardian(id));
+
+Data Insertion
+*AgeGroup*
+INSERT INTO AgeGroup (age_group) VALUES ('U6s'),('U8s'),('U10s'),('U12s');
+
+*Coach*
+INSERT INTO Coach (coach_name) VALUES ('Arthur'),('Barry'),('Charlie'),('Dennis');
+
+*Guardian*
+INSERT INTO Guardian (guardian_name) VALUES ('Andrea'),('Brandy'),('Carlito'),('Danny'),('Emmy'),('Gemma'),('Harry'),('Indira'),('Jimmy'),('Kieron'),('Leroy'),('Mike'),('Noppert'),('Oscar');
+
+*Team*
+*U6s*
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (1,'5','3','alpha');
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (1,'5','2','bravo');
+*U8s*
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (2,'5','1','charlie');
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (2,'5','5','delta');
+*U10s*
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (3,'5','2','echo');
+*U12s*
+INSERT INTO Team (age_group_id,number_of_players,league_position,team_name) VALUES (4,'7','1','foxtrot');
+
+*Player*
+*Alpha*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Alfie','5',1),
+('Artie','6',1),
+('Angie','5',1),
+('Angus','6',1),
+('Argus','5',1);
+
+*Bravo*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Bertie','5',2),
+('Bradley','6',2),
+('Barty','5',2),
+('Barakus','6',2),
+('Brennan','5',2);
+
+*Charlie*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Corie','7',3),
+('Colly','8',3),
+('Cagney','7',3),
+('Crunch','8',3),
+('Carley','7',3);
+
+*Delta*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Danny','7',4),
+('Darren','8',4),
+('Darnell','7',4),
+('Doofus','8',4),
+('Dingle','7',4);
+
+*Echo*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Ernest','9',5),
+('Engels','10',5),
+('Engelbert','9',5),
+('Emer','10',5),
+('Emmett','9',5);
+
+*Foxtrot*
+INSERT INTO player (player_name,age,team_id) 
+VALUES 
+('Forest','11',6),
+('Fred','12',6),
+('Frond','11',6),
+('Frederico','12',6),
+('Frappuccino','11',6),
+('Finn','11',6),
+('Feinnes','12',6),
+('Fellippe','11',6);
+
+*coach_team*
+INSERT INTO coach_team (coach_id,team_id)
+VALUES
+(1,1),
+(1,2),
+(2,3),
+(2,4),
+(3,5),
+(4,6);
+
+*playerguardian*
+INSERT INTO playerguardian (player_id,guardian_id)
+VALUES
+(1,1),
+(2,1),
+(3,2),
+(4,2),
+(5,3),
+(6,3),
+(7,4),
+(8,4),
+(9,5),
+(10,5),
+(11,6),
+(12,6),
+(13,7),
+(14,7),
+(15,8),
+(16,8),
+(17,9),
+(18,9),
+(19,10),
+(20,10),
+(21,11),
+(22,11),
+(23,12),
+(24,12),
+(25,13),
+(26,13),
+(27,14),
+(28,14),
+(29,14),
+(30,1),
+(31,12),
+(32,13),
+(33,3);
+
+*QUERIES*
+*Which coach manages which team(s)?*
+SELECT coach_name,team_name FROM coach
+JOIN coach_team
+ON coach.id=coach_team.coach_id
+JOIN team
+ON team.id=coach_team.team_id;
+
+*How many players are part of a team thats top of the league?*
+SELECT count(player.team_id) FROM player
+JOIN team
+ON player.team_id=team.id
+WHERE league_position = 1
+
+*Name them*
+SELECT player_name FROM player
+JOIN team
+ON player.team_id=team.id
+WHERE league_position = 1
+
+*How many children does each parent have - descending?*
+SELECT guardian_name,count(playerguardian.guardian_id) FROM guardian
+JOIN playerguardian
+ON guardian.id=playerguardian.guardian_id
+GROUP BY guardian_name
+ORDER BY count(playerguardian.guardian_id) DESC;
